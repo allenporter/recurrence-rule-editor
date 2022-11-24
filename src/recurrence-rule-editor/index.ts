@@ -1,1 +1,1 @@
-export { RecurrenceRuleEditor } from './recurrence-rule-editor.js';
+export { RecurrenceRuleEditor } from './RecurrenceRuleEditor.js';
