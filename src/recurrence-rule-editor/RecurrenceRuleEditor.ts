@@ -14,12 +14,6 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @property({ type: Number }) counter = 5;
 
-  constructor() {
-    super();
-    this.title = 'Hi there';
-    this.counter = 3;
-  }
-
   __increment(): void {
     this.counter += 1;
   }
