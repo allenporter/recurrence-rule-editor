@@ -20,7 +20,7 @@ export class RecurrenceRuleEditor extends LitElement {
 
   render() {
     return html`
-      <h2>${this.title} Nr. ${this.counter}!</h2>
+      <h2>${this.title} Mr. ${this.counter}!</h2>
       <button @click=${this.__increment}>increment</button>
     `;
   }

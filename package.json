@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@custom-elements-manifest/analyzer": "^0.6.6",
-    "lit": "^2.4.1"
+    "array-union": "^3.0.1",
+    "lit": "^2.4.1",
+    "puppeteer": "^19.3.0"
   },
   "devDependencies": {
     "@open-wc/eslint-config": "^9.0.0",

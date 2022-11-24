@@ -1,4 +1,5 @@
 // import { playwrightLauncher } from '@web/test-runner-playwright';
+import { puppeteerLauncher } from '@web/test-runner-puppeteer';
 
 const filteredLogs = ['Running in dev mode', 'lit-html is in dev mode'];
 
