@@ -5,7 +5,7 @@ import { RecurrenceRuleEditor } from '../src/recurrence-rule-editor/recurrence-r
 describe('RecurrenceRuleEditor', () => {
   it('has a default title "Hey there" and counter 5', async () => {
     const el = await fixture<RecurrenceRuleEditor>(
-      html`<recurrence-rule-editor></recurrence-rule-editor>`
+      html`<recurrence-rule-editor title="abc"></recurrence-rule-editor>`
     );
 
     expect(el.title).to.equal('Hey there');
@@ -14,7 +14,7 @@ describe('RecurrenceRuleEditor', () => {
 
   it('increases the counter on button click', async () => {
     const el = await fixture<RecurrenceRuleEditor>(
-      html`<recurrence-rule-editor></recurrence-rule-editor>`
+      html`<recurrence-rule-editor title="abc"></recurrence-rule-editor>`
     );
     el.shadowRoot!.querySelector('button')!.click();
 
