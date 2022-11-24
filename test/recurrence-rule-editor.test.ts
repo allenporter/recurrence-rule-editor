@@ -30,12 +30,4 @@ describe('RecurrenceRuleEditor', () => {
 
     expect(el.title).to.equal('attribute title');
   });
-
-  it('passes the a11y audit', async () => {
-    const el = await fixture<RecurrenceRuleEditor>(
-      html`<recurrence-rule-editor></recurrence-rule-editor>`
-    );
-
-    await expect(el).shadowDom.to.be.accessible();
-  });
 });
