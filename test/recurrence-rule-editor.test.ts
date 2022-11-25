@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { fixture, expect, elementUpdated } from '@open-wc/testing';
+import { fixture, expect, elementUpdated, oneEvent } from '@open-wc/testing';
 import { RecurrenceRuleEditor } from '../src/recurrence-rule-editor/RecurrenceRuleEditor.js';
 import '../src/recurrence-rule-editor/recurrence-rule-editor.js';
 
@@ -75,5 +75,39 @@ describe('RecurrenceRuleEditor', () => {
     expect(repeat.label).to.equal('Repeat interval');
     expect(repeat.value).to.equal('1');
     expect(repeat.suffix).to.equal('days');
+  });
+
+  it('can send "rrule" event for "monthly"', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    setTimeout(async () =>  {
+      sel.select(2);  
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=MONTHLY');
+    }
+  });
+
+  it('can send "rrule" event for "weekly"', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    setTimeout(async () =>  {
+      sel.select(3);  
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=WEEKLY');
+    }
   });
 });
