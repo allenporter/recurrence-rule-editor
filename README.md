@@ -1,6 +1,9 @@
 # \<recurrence-rule-editor>
 
-A webcomponent for editing rfc5545 recurrence rules. This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
+A webcomponent for editing rfc5545 recurrence rules. This webcomponent follows the
+[open-wc](https://github.com/open-wc/open-wc) recommendation. 
+
+See [demo](https://allenporter.github.io/recurrence-rule-editor/) for an example.
 
 ## Installation
 
