@@ -3,7 +3,8 @@ import { state } from 'lit/decorators.js';
 import '@material/mwc-icon/mwc-icon.js';
 import '@material/mwc-list/mwc-list-item.js';
 import { SelectedDetail } from '@material/mwc-list';
-import { Select } from '@material/mwc-select/mwc-select.js';
+import { Select } from '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
+import '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
 import '@material/mwc-textfield/mwc-textfield.js';
 import {
   mdiAlphaFCircle,
