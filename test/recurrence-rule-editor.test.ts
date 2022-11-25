@@ -57,8 +57,9 @@ describe('RecurrenceRuleEditor', () => {
     expect(repeat.value).to.equal('1');
     expect(repeat.suffix).to.equal('weeks');
 
-    const toggle = el.shadowRoot!.querySelector('svg-button-toggle');
-    expect(toggle).not.equal(null);
+    // Verify day of week toggles are shown
+    const toggles = el.shadowRoot!.querySelectorAll('button-toggle');
+    expect(toggles.length).to.equal(7);
   });
 
   it('can select a "daily" frequency', async () => {
