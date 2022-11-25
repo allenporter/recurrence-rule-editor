@@ -12,14 +12,17 @@ export class ButtonToggle extends LitElement {
 
   render() {
     return html`
-        <mwc-button label=${this.label !== undefined ? this.label : ""}
+      <mwc-button
+        label=${this.label !== undefined ? this.label : ''}
         .unelevated=${this.on}
         .outlined=${!this.on}
-        @click=${this._toggle}>
-        </mwc-button>
+        @click=${this._toggle}
+      >
+      </mwc-button>
     `;
   }
 
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   _toggle(e: CustomEvent) {
     this.on = !this.on;
     this.dispatchEvent(
