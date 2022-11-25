@@ -7,11 +7,10 @@ import { Select } from '@material/mwc-select/mwc-select.js'; // eslint-disable-l
 import '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
 import '@material/mwc-textfield/mwc-textfield.js';
 import './button-toggle/button-toggle.js';
-import { RRule, Frequency } from 'rrule';
+import { RRule, Frequency, Weekday, WeekdayStr } from 'rrule';
 import type { Options } from 'rrule';
 
 type RepeatFrequency = 'none' | 'yearly' | 'monthly' | 'weekly' | 'daily';
-type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
 function intervalSuffix(freq: RepeatFrequency) {
   if (freq === 'monthly') {
@@ -74,7 +73,7 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @state() private _interval: number = 1;
 
-  @state() private _weekday: Set<Weekday> = new Set<Weekday>();
+  @state() private _weekday: Set<WeekdayStr> = new Set<WeekdayStr>();
 
   protected willUpdate(changedProps: PropertyValues) {
     super.willUpdate(changedProps);
@@ -143,19 +142,40 @@ export class RecurrenceRuleEditor extends LitElement {
         ? html`
             <div>
               <button-toggle
+                label="Sun"
+                value="SU"
+                @button-toggle-change=${this._onWeekdayToggle}
+              ></button-toggle>
+              <button-toggle
                 label="Mon"
-                value="mon"
+                value="MO"
                 @button-toggle-change=${this._onWeekdayToggle}
               ></button-toggle>
               <button-toggle
                 label="Tue"
+                value="TU"
                 @button-toggle-change=${this._onWeekdayToggle}
               ></button-toggle>
-              <button-toggle label="Wed"></button-toggle>
-              <button-toggle label="Thu"></button-toggle>
-              <button-toggle label="Fri"></button-toggle>
-              <button-toggle label="Sat"></button-toggle>
-              <button-toggle label="Sun"></button-toggle>
+              <button-toggle
+                label="Wed"
+                value="WE"
+                @button-toggle-change=${this._onWeekdayToggle}
+              ></button-toggle>
+              <button-toggle
+                label="Thu"
+                value="TH"
+                @button-toggle-change=${this._onWeekdayToggle}
+              ></button-toggle>
+              <button-toggle
+                label="Fri"
+                value="FR"
+                @button-toggle-change=${this._onWeekdayToggle}
+              ></button-toggle>
+              <button-toggle
+                label="Sat"
+                value="SA"
+                @button-toggle-change=${this._onWeekdayToggle}
+              ></button-toggle>
             </div>
           `
         : html``}
@@ -183,8 +203,12 @@ export class RecurrenceRuleEditor extends LitElement {
   }
 
   private _onWeekdayToggle(e: CustomEvent) {
-    // TODO: Update day of week in rrule
-    // const { isOn, weekday } = e.detail;
+    const { isOn, value } = e.detail;
+    if (isOn) {
+      this._weekday.add(value);
+    } else {
+      this._weekday.delete(value);
+    }
     this._updateRule();
   }
 
@@ -195,9 +219,33 @@ export class RecurrenceRuleEditor extends LitElement {
     const options = {
       freq: convertRepeatFrequency(this._freq!)!,
       interval: this._interval > 1 ? this._interval : undefined,
+      byweekday: this._ruleByWeekDay(),
     };
     const contentline = RRule.optionsToString(options);
     return contentline.slice(6); // Strip "RRULE:" prefix
+  }
+
+  private _ruleByWeekDay(): Weekday[] | undefined {
+    return Array.from(this._weekday).map((value: string) => {
+      switch (value) {
+        case "MO":
+          return RRule.MO;
+        case "TU":
+          return RRule.TU;
+        case "WE":
+          return RRule.WE;
+        case "TH":
+          return RRule.TH;
+        case "FR":
+          return RRule.FR;
+        case "SA":
+          return RRule.SA;
+        case "SU":
+          return RRule.SU;
+        default:
+          return RRule.MO;
+        }
+    });
   }
 
   // Fire event with an rfc5546 recurrence rule string value
