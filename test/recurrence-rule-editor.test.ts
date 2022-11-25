@@ -128,7 +128,7 @@ describe('RecurrenceRuleEditor', () => {
       expect(detail.value).to.equal('FREQ=WEEKLY');
     }
 
-    // eslint-disable-next-line no-undef
+    // XXXeslint-disable-next-line no-undef
     const toggles: NodeListOf<ButtonToggle> =
       el.shadowRoot!.querySelectorAll('button-toggle');
     expect(toggles.length).to.equal(7);
