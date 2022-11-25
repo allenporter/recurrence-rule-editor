@@ -38,7 +38,7 @@ jobs:
       - name: Prepare artifacts
         run: |
           mkdir -p _site
-          cp -r dist _site
+          cp -r dist/* _site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
 
