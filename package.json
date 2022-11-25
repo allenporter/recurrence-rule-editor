@@ -19,6 +19,7 @@
     "prepublish": "tsc && npm run analyze -- --exclude dist",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
+    "lint_format:ci": "eslint --ext .ts,.html . --ignore-path .gitignore --max-warnings=0 && prettier \"**/*.ts\" --ignore-path .gitignore --check",
     "test": "tsc && wtr --coverage",
     "test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\"",
     "deploy": "rimraf dist && npm run prepublish && rollup -c rollup.config.js"

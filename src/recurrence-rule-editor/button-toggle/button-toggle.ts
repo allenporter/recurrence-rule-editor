@@ -30,8 +30,8 @@ export class ButtonToggle extends LitElement {
     this.dispatchEvent(
       new CustomEvent('button-toggle-change', {
         detail: {
-            isOn: this.on,
-            value: this.value,
+          isOn: this.on,
+          value: this.value,
         },
         bubbles: true,
       })
