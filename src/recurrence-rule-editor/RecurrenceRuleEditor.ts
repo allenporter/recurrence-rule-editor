@@ -228,23 +228,23 @@ export class RecurrenceRuleEditor extends LitElement {
   private _ruleByWeekDay(): Weekday[] | undefined {
     return Array.from(this._weekday).map((value: string) => {
       switch (value) {
-        case "MO":
+        case 'MO':
           return RRule.MO;
-        case "TU":
+        case 'TU':
           return RRule.TU;
-        case "WE":
+        case 'WE':
           return RRule.WE;
-        case "TH":
+        case 'TH':
           return RRule.TH;
-        case "FR":
+        case 'FR':
           return RRule.FR;
-        case "SA":
+        case 'SA':
           return RRule.SA;
-        case "SU":
+        case 'SU':
           return RRule.SU;
         default:
           return RRule.MO;
-        }
+      }
     });
   }
 

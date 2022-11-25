@@ -2,7 +2,7 @@ import { html } from 'lit';
 import { fixture, expect, elementUpdated, oneEvent } from '@open-wc/testing';
 import { RecurrenceRuleEditor } from '../src/recurrence-rule-editor/RecurrenceRuleEditor.js';
 import '../src/recurrence-rule-editor/recurrence-rule-editor.js';
-import { ButtonToggle } from '../src/recurrence-rule-editor/button-toggle/button-toggle.js'
+import { ButtonToggle } from '../src/recurrence-rule-editor/button-toggle/button-toggle.js';
 
 describe('RecurrenceRuleEditor', () => {
   it('has a default frequency of "none"', async () => {
@@ -85,8 +85,8 @@ describe('RecurrenceRuleEditor', () => {
     await elementUpdated(el);
 
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    setTimeout(async () =>  {
-      sel.select(2);  
+    setTimeout(async () => {
+      sel.select(2);
     });
 
     {
@@ -102,8 +102,8 @@ describe('RecurrenceRuleEditor', () => {
     await elementUpdated(el);
 
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    setTimeout(async () =>  {
-      sel.select(3);  
+    setTimeout(async () => {
+      sel.select(3);
     });
 
     {
@@ -117,10 +117,10 @@ describe('RecurrenceRuleEditor', () => {
       html`<recurrence-rule-editor></recurrence-rule-editor>`
     );
     await elementUpdated(el);
-    
+
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    setTimeout(async () =>  {
-      sel.select(3);  
+    setTimeout(async () => {
+      sel.select(3);
     });
 
     {
@@ -129,10 +129,11 @@ describe('RecurrenceRuleEditor', () => {
     }
 
     // eslint-disable-next-line no-undef
-    const toggles: NodeListOf<ButtonToggle> = el.shadowRoot!.querySelectorAll('button-toggle');
+    const toggles: NodeListOf<ButtonToggle> =
+      el.shadowRoot!.querySelectorAll('button-toggle');
     expect(toggles.length).to.equal(7);
-    
-    setTimeout(async () =>  {
+
+    setTimeout(async () => {
       toggles[1].shadowRoot!.querySelector('mwc-button')!.click();
     });
     {
@@ -141,16 +142,15 @@ describe('RecurrenceRuleEditor', () => {
     }
   });
 
-
   it('can multi-select day of week', async () => {
     const el = await fixture<RecurrenceRuleEditor>(
       html`<recurrence-rule-editor></recurrence-rule-editor>`
     );
     await elementUpdated(el);
-    
+
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    setTimeout(async () =>  {
-      sel.select(3);  
+    setTimeout(async () => {
+      sel.select(3);
     });
 
     {
@@ -159,20 +159,21 @@ describe('RecurrenceRuleEditor', () => {
     }
 
     // eslint-disable-next-line no-undef
-    const toggles: NodeListOf<ButtonToggle> = el.shadowRoot!.querySelectorAll('button-toggle');
+    const toggles: NodeListOf<ButtonToggle> =
+      el.shadowRoot!.querySelectorAll('button-toggle');
     expect(toggles.length).to.equal(7);
-    
+
     // Select Monday
-    setTimeout(async () =>  {
+    setTimeout(async () => {
       toggles[1].shadowRoot!.querySelector('mwc-button')!.click();
     });
     {
       const { detail } = await oneEvent(el, 'value-changed');
       expect(detail.value).to.equal('FREQ=WEEKLY;BYDAY=MO');
     }
-    
+
     // Select Tuesday
-    setTimeout(async () =>  {
+    setTimeout(async () => {
       toggles[2].shadowRoot!.querySelector('mwc-button')!.click();
     });
     {
@@ -181,7 +182,7 @@ describe('RecurrenceRuleEditor', () => {
     }
 
     // De-select Monday
-    setTimeout(async () =>  {
+    setTimeout(async () => {
       toggles[1].shadowRoot!.querySelector('mwc-button')!.click();
     });
     {
@@ -190,7 +191,7 @@ describe('RecurrenceRuleEditor', () => {
     }
 
     // Select Thursday
-    setTimeout(async () =>  {
+    setTimeout(async () => {
       toggles[4].shadowRoot!.querySelector('mwc-button')!.click();
     });
     {
