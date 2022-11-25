@@ -8,6 +8,8 @@ export class ButtonToggle extends LitElement {
 
   @property() public label?: string;
 
+  @property() public value?: string;
+
   @property() public on: boolean = false;
 
   render() {
@@ -27,7 +29,10 @@ export class ButtonToggle extends LitElement {
     this.on = !this.on;
     this.dispatchEvent(
       new CustomEvent('button-toggle-change', {
-        detail: { isOn: this.on },
+        detail: {
+            isOn: this.on,
+            value: this.value,
+        },
         bubbles: true,
       })
     );

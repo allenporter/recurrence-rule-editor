@@ -12,26 +12,43 @@
       align: center;
     }
 
+    .outline {
+      border: 1px solid;
+      padding: 10px;
+    }
+
   </style>
 </head>
 <body>
   <h1>Recurrence Rule Editor</h1>
 
-  <div>
+  <p>
   A webcomponent for editing rfc5545 recurrence rules. This component is built using
   <a href="https://lit.dev/">Lit</a> and the <a href="https://open-wc.org/">Open Web Components</a>
   best practices. See <a href="https://github.com/allenporter/recurrence-rule-editor">recurrence-rule-editor on github</a> for more details.
-  </div>
+  </p>
+
+  
+  <h3>Recurrence Rule Editor</h3>
 
   <div id="demo"></div>
+
+  <h3>RRule</h3>
+
+  <div id="rule" class="outline"></div>
 
   <script type="module">
     import { html, render } from 'lit';
     import '../dist/src/recurrence-rule-editor/recurrence-rule-editor.js';
 
+    function _valueChanged(e) {
+      const ruleElement = document.querySelector('#rule');
+      ruleElement.innerHTML = e.detail.value;
+    }
+
     render(
       html`
-        <recurrence-rule-editor>
+        <recurrence-rule-editor @value-changed=${_valueChanged}>
         </recurrence-rule-editor>
       `,
       document.querySelector('#demo')
