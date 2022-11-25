@@ -8,13 +8,11 @@ on:
 
 jobs:
   build:
-
+    name: Tests
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [16.x, 18.x]
-
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
@@ -27,3 +25,20 @@ jobs:
     - run: npm run format
     - run: npm run lint
     - run: npm test
+
+  format-lint:
+    name: Verify Formatting and Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: 16.x
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run format:ci
+    - run: npm run lint
