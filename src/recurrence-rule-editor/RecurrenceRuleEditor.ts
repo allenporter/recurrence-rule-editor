@@ -6,19 +6,7 @@ import { SelectedDetail } from '@material/mwc-list';
 import { Select } from '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
 import '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
 import '@material/mwc-textfield/mwc-textfield.js';
-import {
-  mdiAlphaFCircle,
-  mdiAlphaFCircleOutline,
-  mdiAlphaMCircle,
-  mdiAlphaMCircleOutline,
-  mdiAlphaSCircle,
-  mdiAlphaSCircleOutline,
-  mdiAlphaTCircle,
-  mdiAlphaTCircleOutline,
-  mdiAlphaWCircle,
-  mdiAlphaWCircleOutline,
-} from '@mdi/js';
-import './svg-button-toggle/svg-button-toggle.js';
+import './button-toggle/button-toggle.js';
 
 type RepeatFrequency = 'none' | 'yearly' | 'monthly' | 'weekly' | 'daily';
 
@@ -85,34 +73,13 @@ export class RecurrenceRuleEditor extends LitElement {
       ${this._freq === 'weekly'
         ? html`
             <div>
-              <svg-button-toggle
-                onIcon=${mdiAlphaMCircle}
-                offIcon=${mdiAlphaMCircleOutline}
-              ></svg-button-toggle>
-              <svg-button-toggle
-                onIcon=${mdiAlphaTCircle}
-                offIcon=${mdiAlphaTCircleOutline}
-              ></svg-button-toggle>
-              <svg-button-toggle
-                onIcon=${mdiAlphaWCircle}
-                offIcon=${mdiAlphaWCircleOutline}
-              ></svg-button-toggle>
-              <svg-button-toggle
-                onIcon=${mdiAlphaTCircle}
-                offIcon=${mdiAlphaTCircleOutline}
-              ></svg-button-toggle>
-              <svg-button-toggle
-                onIcon=${mdiAlphaFCircle}
-                offIcon=${mdiAlphaFCircleOutline}
-              ></svg-button-toggle>
-              <svg-button-toggle
-                onIcon=${mdiAlphaSCircle}
-                offIcon=${mdiAlphaSCircleOutline}
-              ></svg-button-toggle>
-              <svg-button-toggle
-                onIcon=${mdiAlphaSCircle}
-                offIcon=${mdiAlphaSCircleOutline}
-              ></svg-button-toggle>
+              <button-toggle label="Man"></button-toggle>
+              <button-toggle label="Tue"></button-toggle>
+              <button-toggle label="Wed"></button-toggle>
+              <button-toggle label="Thu"></button-toggle>
+              <button-toggle label="Fri"></button-toggle>
+              <button-toggle label="Sat"></button-toggle>
+              <button-toggle label="Sun"></button-toggle>
             </div>
           `
         : html``}

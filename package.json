@@ -1,9 +1,11 @@
 {
-  "name": "recurrence-rule-editor",
-  "description": "Webcomponent recurrence-rule-editor following open-wc recommendations",
+  "name": "@allenporter/recurrence-rule-editor",
+  "description": "A Webcomponent for an rfc5545 recurrence rule editor, following open-wc recommendations",
   "license": "MIT",
-  "author": "recurrence-rule-editor",
-  "version": "0.0.0",
+  "author": "Allen Porter",
+  "version": "0.0.1",
+  "homepage": "https://github.com/allenporter/recurrence-rule-editor",
+  "bugs": "https://github.com/allenporter/recurrence-rule-editor/issues",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {
@@ -22,8 +24,8 @@
   },
   "dependencies": {
     "@custom-elements-manifest/analyzer": "^0.6.6",
+    "@material/mwc-button": "^0.27.0",
     "@material/mwc-icon": "^0.27.0",
-    "@material/mwc-icon-button-toggle": "^0.27.0",
     "@material/mwc-list": "^0.27.0",
     "@material/mwc-select": "^0.27.0",
     "@material/mwc-textfield": "^0.27.0",
