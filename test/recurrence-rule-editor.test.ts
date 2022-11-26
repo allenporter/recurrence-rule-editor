@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import { Select } from '@material/mwc-select/mwc-select.js';
 import { fixture, expect, elementUpdated, oneEvent } from '@open-wc/testing';
 import { RecurrenceRuleEditor } from '../src/recurrence-rule-editor/RecurrenceRuleEditor.js';
 import '../src/recurrence-rule-editor/recurrence-rule-editor.js';
@@ -21,7 +22,7 @@ describe('RecurrenceRuleEditor', () => {
       html`<recurrence-rule-editor></recurrence-rule-editor>`
     );
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    sel.select(1);
+    sel.select(1); // Yearly
     await elementUpdated(el);
     expect(sel.selected!.value).to.equal('yearly');
 
@@ -34,7 +35,7 @@ describe('RecurrenceRuleEditor', () => {
       html`<recurrence-rule-editor></recurrence-rule-editor>`
     );
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    sel.select(2);
+    sel.select(2); // Monthly
     await elementUpdated(el);
     expect(sel.selected!.value).to.equal('monthly');
 
@@ -49,7 +50,7 @@ describe('RecurrenceRuleEditor', () => {
       html`<recurrence-rule-editor></recurrence-rule-editor>`
     );
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
-    sel.select(3);
+    sel.select(3); // Weekly
     await elementUpdated(el);
     expect(sel.selected!.value).equal('weekly');
 
@@ -86,7 +87,7 @@ describe('RecurrenceRuleEditor', () => {
 
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
     setTimeout(async () => {
-      sel.select(2);
+      sel.select(2); // Monthly
     });
 
     {
@@ -103,7 +104,7 @@ describe('RecurrenceRuleEditor', () => {
 
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
     setTimeout(async () => {
-      sel.select(3);
+      sel.select(3); // Weekly
     });
 
     {
@@ -120,7 +121,7 @@ describe('RecurrenceRuleEditor', () => {
 
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
     setTimeout(async () => {
-      sel.select(3);
+      sel.select(3); // Weekly
     });
 
     {
@@ -150,7 +151,7 @@ describe('RecurrenceRuleEditor', () => {
 
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
     setTimeout(async () => {
-      sel.select(3);
+      sel.select(3); // Weekly
     });
 
     {
@@ -197,6 +198,103 @@ describe('RecurrenceRuleEditor', () => {
     {
       const { detail } = await oneEvent(el, 'value-changed');
       expect(detail.value).to.equal('FREQ=WEEKLY;BYDAY=TU,TH');
+    }
+  });
+
+  it('can set number of ocurrences to end', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    setTimeout(async () => {
+      sel.select(1); // Yearly
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=YEARLY');
+    }
+    // Select ending after a number of ocurrences
+    const endSel: Select = el.shadowRoot!.querySelector('#end')!;
+    expect(endSel).not.equal(null);
+    setTimeout(async () => {
+      endSel.select(1); // Ends On
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=YEARLY;COUNT=5');
+    }
+  });
+
+  it('can set recurrence to end after a date', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    setTimeout(async () => {
+      sel.select(1); // Yearly
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=YEARLY');
+    }
+    // Select ending on a specific date
+    const endSel: Select = el.shadowRoot!.querySelector('#end')!;
+    expect(endSel).not.equal(null);
+    setTimeout(async () => {
+      endSel.select(2); // Ends After
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      // Don't match date string since it is not stable
+      expect(detail.value.slice(0, 18)).to.equal('FREQ=YEARLY;UNTIL=');
+    }
+  });
+
+  it('can reset unnecessary fields when changing frequency types', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    setTimeout(async () => {
+      sel.select(3); // Weekly
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=WEEKLY');
+    }
+
+    // eslint-disable-next-line no-undef
+    const toggles: NodeListOf<ButtonToggle> =
+      el.shadowRoot!.querySelectorAll('button-toggle');
+    expect(toggles.length).to.equal(7);
+
+    setTimeout(async () => {
+      toggles[1].shadowRoot!.querySelector('mwc-button')!.click();
+    });
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=WEEKLY;BYDAY=MO');
+    }
+
+    // Change frequency type which should reset the weekday options
+    setTimeout(async () => {
+      sel.select(4); // Daily
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=DAILY');
     }
   });
 });
