@@ -12,6 +12,16 @@ import type { Options } from 'rrule';
 
 type RepeatFrequency = 'none' | 'yearly' | 'monthly' | 'weekly' | 'daily';
 
+type RepeatEnd = 'never' | 'on' | 'after';
+
+const DEFAULT_COUNT = {
+  none: 1,
+  yearly: 5,
+  monthly: 12,
+  weekly: 13,
+  daily: 30,
+};
+
 function intervalSuffix(freq: RepeatFrequency) {
   if (freq === 'monthly') {
     return 'months';
@@ -20,6 +30,22 @@ function intervalSuffix(freq: RepeatFrequency) {
     return 'weeks';
   }
   return 'days';
+}
+
+function untilValue(freq: RepeatFrequency): Date {
+  const today = new Date();
+  const increment = DEFAULT_COUNT[freq];
+  switch (freq) {
+    case 'yearly':
+      return new Date(new Date().setFullYear(today.getFullYear() + increment));
+    case 'monthly':
+      return new Date(new Date().setMonth(today.getMonth() + increment));
+    case 'weekly':
+      return new Date(new Date().setDate(today.getDate() + 7 * increment));
+    case 'daily':
+    default:
+      return new Date(new Date().setDate(today.getDate() + increment));
+  }
 }
 
 const convertFrequency = (freq: Frequency): RepeatFrequency | undefined => {
@@ -67,13 +93,17 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @state() private _computedRrule = '';
 
-  @state() private _rrule?: Partial<Options>;
-
   @state() private _freq?: RepeatFrequency = 'none';
 
   @state() private _interval: number = 1;
 
   @state() private _weekday: Set<WeekdayStr> = new Set<WeekdayStr>();
+
+  @state() private _end: RepeatEnd = 'never';
+
+  @state() private _count?: number;
+
+  @state() private _until?: Date;
 
   protected willUpdate(changedProps: PropertyValues) {
     super.willUpdate(changedProps);
@@ -81,10 +111,15 @@ export class RecurrenceRuleEditor extends LitElement {
     if (!changedProps.has('rrule')) {
       return;
     }
+    this._interval = 1;
+    this._weekday.clear();
+    this._end = 'never';
+    this._count = undefined;
+    this._until = undefined;
+
     this._computedRrule = this.rrule;
     if (this.rrule === '') {
       this._freq = 'none';
-      this._interval = 1;
       return;
     }
     let rrule: Partial<Options> | undefined;
@@ -93,11 +128,10 @@ export class RecurrenceRuleEditor extends LitElement {
     } catch (ex) {
       // unsupported rrule string
       this._freq = undefined;
-      this._interval = 1;
       return;
     }
-    // this._rrule.
     this._freq = convertFrequency(rrule!.freq!);
+    // TODO: Parse value from incoming rrule
   }
 
   render() {
@@ -128,14 +162,16 @@ export class RecurrenceRuleEditor extends LitElement {
 
       ${this._freq !== 'none' && this._freq !== 'yearly'
         ? html`
-            <mwc-textfield
-              label="Repeat interval"
-              type="number"
-              min="1"
-              value=${this._interval}
-              suffix=${intervalSuffix(this._freq!)}
-              @change=${this._onIntervalChange}
-            ></mwc-textfield>
+            <div>
+              <mwc-textfield
+                label="Repeat interval"
+                type="number"
+                min="1"
+                value=${this._interval}
+                suffix=${intervalSuffix(this._freq!)}
+                @change=${this._onIntervalChange}
+              ></mwc-textfield>
+            </div>
           `
         : html``}
       ${this._freq === 'weekly'
@@ -179,6 +215,44 @@ export class RecurrenceRuleEditor extends LitElement {
             </div>
           `
         : html``}
+      ${this._freq !== 'none'
+        ? html` <div>
+            <mwc-select id="end" label="Ends" @selected=${this._onEndSelected}>
+              <mwc-list-item value="never" .selected=${this._end === 'never'}
+                >Never</mwc-list-item
+              >
+              <mwc-list-item value="after" .selected=${this._end === 'after'}
+                >After</mwc-list-item
+              >
+              <mwc-list-item value="on" .selected=${this._end === 'on'}
+                >On</mwc-list-item
+              >
+            </mwc-select>
+
+            ${this._end === 'after'
+              ? html`
+                  <mwc-textfield
+                    label="Ends after"
+                    type="number"
+                    min="1"
+                    value=${this._count!}
+                    suffix="ocurrences"
+                    @change=${this._onCountChange}
+                  ></mwc-textfield>
+                `
+              : html``}
+            ${this._end === 'on'
+              ? html`
+                  <mwc-textfield
+                    label="Ends on"
+                    type="date"
+                    value=${this._until!.toISOString().slice(0, 10)}
+                    @change=${this._onUntilChange}
+                  ></mwc-textfield>
+                `
+              : html``}
+          </div>`
+        : html``}
     `;
   }
 
@@ -189,15 +263,12 @@ export class RecurrenceRuleEditor extends LitElement {
 
   private _onRepeatSelected(e: CustomEvent<SelectedDetail>) {
     this._freq = (e.target as Select).value as RepeatFrequency;
-
-    if (this._freq === undefined || this._freq === 'none') {
-      this._rrule = undefined;
-    } else {
-      this._rrule = {
-        freq: convertRepeatFrequency(this._freq!)!,
-      };
+    if (this._freq === 'yearly') {
+      this._interval = 1;
     }
-    this.requestUpdate();
+    if (this._freq !== 'weekly') {
+      this._weekday.clear();
+    }
     e.stopPropagation();
     this._updateRule();
   }
@@ -212,6 +283,36 @@ export class RecurrenceRuleEditor extends LitElement {
     this._updateRule();
   }
 
+  private _onEndSelected(e: CustomEvent<SelectedDetail>) {
+    this._end = (e.target as Select).value as RepeatEnd;
+
+    switch (this._end) {
+      case 'after':
+        this._count = DEFAULT_COUNT[this._freq!];
+        this._until = undefined;
+        break;
+      case 'on':
+        this._count = undefined;
+        this._until = untilValue(this._freq!);
+        break;
+      default:
+        this._count = undefined;
+        this._until = undefined;
+    }
+    e.stopPropagation();
+    this._updateRule();
+  }
+
+  private _onCountChange(e: Event) {
+    this._count = (e.target! as any).value;
+    this._updateRule();
+  }
+
+  private _onUntilChange(e: Event) {
+    this._until = (e.target! as any).value;
+    this._updateRule();
+  }
+
   private _ruleString() {
     if (this._freq === undefined || this._freq === 'none') {
       return '';
@@ -220,6 +321,8 @@ export class RecurrenceRuleEditor extends LitElement {
       freq: convertRepeatFrequency(this._freq!)!,
       interval: this._interval > 1 ? this._interval : undefined,
       byweekday: this._ruleByWeekDay(),
+      count: this._count,
+      until: this._until,
     };
     const contentline = RRule.optionsToString(options);
     return contentline.slice(6); // Strip "RRULE:" prefix
