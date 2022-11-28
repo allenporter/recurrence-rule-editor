@@ -8,14 +8,14 @@ See [demo](https://allenporter.github.io/recurrence-rule-editor/) for an example
 ## Installation
 
 ```bash
-npm i recurrence-rule-editor
+npm i @allenporter/recurrence-rule-editor
 ```
 
 ## Usage
 
 ```html
 <script type="module">
-  import 'recurrence-rule-editor/recurrence-rule-editor.js';
+  import '@allenporter/recurrence-rule-editor/recurrence-rule-editor.js';
 </script>
 
 <recurrence-rule-editor></recurrence-rule-editor>
