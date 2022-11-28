@@ -4,6 +4,7 @@ import { fixture, expect, elementUpdated, oneEvent } from '@open-wc/testing';
 import { RecurrenceRuleEditor } from '../src/recurrence-rule-editor/RecurrenceRuleEditor.js';
 import '../src/recurrence-rule-editor/recurrence-rule-editor.js';
 import { ButtonToggle } from '../src/recurrence-rule-editor/button-toggle/button-toggle.js';
+import { TextField } from '@material/mwc-textfield';
 
 describe('RecurrenceRuleEditor', () => {
   it('has a default frequency of "none"', async () => {
@@ -292,6 +293,111 @@ describe('RecurrenceRuleEditor', () => {
       sel.select(4); // Daily
     });
 
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=DAILY');
+    }
+  });
+
+
+  it('can parse a yearly "rrule" as input', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor value="FREQ=YEARLY"></recurrence-rule-editor>`
+    );
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    await elementUpdated(sel);
+    expect(sel.selected).not.equal(null);
+    expect(sel.selected!.value).to.equal("yearly")
+  });
+
+  it('can parse a weekly "rrule" as input', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor value="FREQ=WEEKLY"></recurrence-rule-editor>`
+    );
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    await elementUpdated(sel);
+    expect(sel.selected).not.equal(null);
+    expect(sel.selected!.value).to.equal("weekly")
+  });
+
+  it('can parse a more complex "rrule" as input', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor value="FREQ=WEEKLY;INTERVAL=2;COUNT=3"></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    expect(sel.selected).not.equal(null);
+    expect(sel.selected!.value).to.equal("weekly");
+
+    // Verify INTERVAL=2
+    const interval: TextField = el.shadowRoot!.querySelector('mwc-textfield#interval')!;
+    expect(interval.label).to.equal('Repeat interval');
+    expect(interval.value).to.equal('2');
+    expect(interval.suffix).to.equal('weeks');
+
+    // Verify COUNT=3
+    const endSel: Select = el.shadowRoot!.querySelector('mwc-select#end')!;
+    expect(endSel).not.equal(null);
+    expect(endSel.selected).not.equal(null);
+    expect(endSel.selected!.value).to.equal('after');
+
+    const after: TextField = el.shadowRoot!.querySelector('mwc-textfield#after')!;
+    expect(after.label).to.equal('End after');
+    expect(after.value).to.equal('3');
+    expect(after.suffix).to.equal('ocurrences');
+
+    // Change frequency type which should preserve some options
+    setTimeout(async () => {
+      sel.select(4); // Daily
+    });
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=DAILY;INTERVAL=2;COUNT=3');
+    }
+  });
+
+
+  it('can parse an "rrule" with day of week as input', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor value="FREQ=WEEKLY;BYDAY=TU,TH"></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    expect(sel.selected).not.equal(null);
+    expect(sel.selected!.value).to.equal("weekly");
+
+    // Verify default value for interval
+    const interval: TextField = el.shadowRoot!.querySelector('mwc-textfield#interval')!;
+    expect(interval.label).to.equal('Repeat interval');
+    expect(interval.value).to.equal('1');
+    expect(interval.suffix).to.equal('weeks');
+
+    // Verify default value for end
+    const endSel: Select = el.shadowRoot!.querySelector('mwc-select#end')!;
+    expect(endSel).not.equal(null);
+    expect(endSel.selected).not.equal(null);
+    expect(endSel.selected!.value).to.equal('never');
+
+
+    // Verify button toggles
+    // eslint-disable-next-line no-undef
+    const toggles: NodeListOf<ButtonToggle> =
+      el.shadowRoot!.querySelectorAll('button-toggle');
+    expect(toggles.length).to.equal(7);
+    expect(toggles[0].on).to.equal(false);
+    expect(toggles[1].on).to.equal(false);
+    expect(toggles[2].on).to.equal(true);  // TU
+    expect(toggles[3].on).to.equal(false);
+    expect(toggles[4].on).to.equal(true); // TH
+    expect(toggles[5].on).to.equal(false);
+    expect(toggles[6].on).to.equal(false);
+
+    // Change frequency type which should clear weekdays
+    setTimeout(async () => {
+      sel.select(4); // Daily
+    });
     {
       const { detail } = await oneEvent(el, 'value-changed');
       expect(detail.value).to.equal('FREQ=DAILY');
