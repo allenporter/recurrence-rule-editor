@@ -3,7 +3,7 @@
   "description": "A Webcomponent for an rfc5545 recurrence rule editor, following open-wc recommendations",
   "license": "MIT",
   "author": "Allen Porter",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/allenporter/recurrence-rule-editor",
   "bugs": "https://github.com/allenporter/recurrence-rule-editor/issues",
   "main": "dist/src/index.js",
