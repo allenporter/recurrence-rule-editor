@@ -7,97 +7,20 @@ import { Select } from '@material/mwc-select/mwc-select.js'; // eslint-disable-l
 import '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
 import '@material/mwc-textfield/mwc-textfield.js';
 import './button-toggle/button-toggle.js';
-import { RRule, Frequency, Weekday, ByWeekday } from 'rrule';
+import { RRule, Weekday, ByWeekday } from 'rrule';
 import type { Options, WeekdayStr } from 'rrule';
-
-type RepeatFrequency = 'none' | 'yearly' | 'monthly' | 'weekly' | 'daily';
-
-type RepeatEnd = 'never' | 'on' | 'after';
-
-const DEFAULT_COUNT = {
-  none: 1,
-  yearly: 5,
-  monthly: 12,
-  weekly: 13,
-  daily: 30,
-};
-
-function intervalSuffix(freq: RepeatFrequency) {
-  if (freq === 'monthly') {
-    return 'months';
-  }
-  if (freq === 'weekly') {
-    return 'weeks';
-  }
-  return 'days';
-}
-
-function untilValue(freq: RepeatFrequency): Date {
-  const today = new Date();
-  const increment = DEFAULT_COUNT[freq];
-  switch (freq) {
-    case 'yearly':
-      return new Date(new Date().setFullYear(today.getFullYear() + increment));
-    case 'monthly':
-      return new Date(new Date().setMonth(today.getMonth() + increment));
-    case 'weekly':
-      return new Date(new Date().setDate(today.getDate() + 7 * increment));
-    case 'daily':
-    default:
-      return new Date(new Date().setDate(today.getDate() + increment));
-  }
-}
-
-const convertFrequency = (freq: Frequency): RepeatFrequency | undefined => {
-  switch (freq) {
-    case Frequency.YEARLY:
-      return 'yearly';
-    case Frequency.MONTHLY:
-      return 'monthly';
-    case Frequency.WEEKLY:
-      return 'weekly';
-    case Frequency.DAILY:
-      return 'daily';
-    default:
-      return undefined;
-  }
-};
-
-const convertRepeatFrequency = (
-  freq: RepeatFrequency
-): Frequency | undefined => {
-  switch (freq) {
-    case 'yearly':
-      return Frequency.YEARLY;
-    case 'monthly':
-      return Frequency.MONTHLY;
-    case 'weekly':
-      return Frequency.WEEKLY;
-    case 'daily':
-      return Frequency.DAILY;
-    default:
-      return undefined;
-  }
-};
-
-const WEEKDAY_NAME = {
-  SU: 'Sun',
-  MO: 'Mon',
-  TU: 'Tue',
-  WE: 'Wed',
-  TH: 'Thu',
-  FR: 'Fri',
-  SA: 'Sat',
-};
-const WEEKDAYS = [
-  RRule.SU,
-  RRule.MO,
-  RRule.TU,
-  RRule.WE,
-  RRule.TH,
-  RRule.FR,
-  RRule.SA,
-];
+import {
+  RepeatFrequency,
+  RepeatEnd,
+  convertFrequency,
+  WEEKDAYS,
+  WEEKDAY_NAME,
+  intervalSuffix,
+  DEFAULT_COUNT,
+  untilValue,
+  convertRepeatFrequency,
+  ruleByWeekDay,
+} from './recurrence.js';
 
 export class RecurrenceRuleEditor extends LitElement {
   static styles = css`
@@ -110,7 +33,7 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @property() public value: string = '';
 
-  @state() private _computedRrule = '';
+  @state() private _computedRRule = '';
 
   @state() private _freq?: RepeatFrequency = 'none';
 
@@ -140,7 +63,7 @@ export class RecurrenceRuleEditor extends LitElement {
     this._count = undefined;
     this._until = undefined;
 
-    this._computedRrule = this.value;
+    this._computedRRule = this.value;
     if (this.value === '') {
       this._freq = 'none';
       return;
@@ -177,7 +100,7 @@ export class RecurrenceRuleEditor extends LitElement {
     }
   }
 
-  render() {
+  renderRepeat() {
     return html`
       <div>
         <mwc-select
@@ -202,78 +125,100 @@ export class RecurrenceRuleEditor extends LitElement {
           >
         </mwc-select>
       </div>
+    `;
+  }
 
-      ${this._freq !== 'none' && this._freq !== 'yearly'
-        ? html`
-            <div>
+  renderMonthly() {
+    return this.renderInterval();
+  }
+
+  renderWeekly() {
+    return html`
+      ${this.renderInterval()}
+      <div>
+        ${this._allWeekdays.map(
+          item => html`
+            <button-toggle
+              label="${WEEKDAY_NAME[item]}"
+              value="${item}"
+              .on=${this._weekday.has(item)}
+              @button-toggle-change=${this._onWeekdayToggle}
+            ></button-toggle>
+          `
+        )}
+      </div>
+    `;
+  }
+
+  renderDaily() {
+    return this.renderInterval();
+  }
+
+  renderInterval() {
+    return html`
+      <div>
+        <mwc-textfield
+          id="interval"
+          label="Repeat interval"
+          type="number"
+          min="1"
+          value=${this._interval}
+          suffix=${intervalSuffix(this._freq!)}
+          @change=${this._onIntervalChange}
+        ></mwc-textfield>
+      </div>
+    `;
+  }
+
+  renderEnd() {
+    return html`
+      <div>
+        <mwc-select id="end" label="Ends" @selected=${this._onEndSelected}>
+          <mwc-list-item value="never" .selected=${this._end === 'never'}
+            >Never</mwc-list-item
+          >
+          <mwc-list-item value="after" .selected=${this._end === 'after'}
+            >After</mwc-list-item
+          >
+          <mwc-list-item value="on" .selected=${this._end === 'on'}
+            >On</mwc-list-item
+          >
+        </mwc-select>
+        ${this._end === 'after'
+          ? html`
               <mwc-textfield
-                id="interval"
-                label="Repeat interval"
+                id="after"
+                label="End after"
                 type="number"
                 min="1"
-                value=${this._interval}
-                suffix=${intervalSuffix(this._freq!)}
-                @change=${this._onIntervalChange}
+                value=${this._count!}
+                suffix="ocurrences"
+                @change=${this._onCountChange}
               ></mwc-textfield>
-            </div>
-          `
-        : html``}
-      ${this._freq === 'weekly'
-        ? html`
-            <div>
-              ${this._allWeekdays.map(
-                item => html`
-                  <button-toggle
-                    label="${WEEKDAY_NAME[item]}"
-                    value="${item}"
-                    .on=${this._weekday.has(item)}
-                    @button-toggle-change=${this._onWeekdayToggle}
-                  ></button-toggle>
-                `
-              )}
-            </div>
-          `
-        : html``}
-      ${this._freq !== 'none'
-        ? html` <div>
-            <mwc-select id="end" label="Ends" @selected=${this._onEndSelected}>
-              <mwc-list-item value="never" .selected=${this._end === 'never'}
-                >Never</mwc-list-item
-              >
-              <mwc-list-item value="after" .selected=${this._end === 'after'}
-                >After</mwc-list-item
-              >
-              <mwc-list-item value="on" .selected=${this._end === 'on'}
-                >On</mwc-list-item
-              >
-            </mwc-select>
+            `
+          : html``}
+        ${this._end === 'on'
+          ? html`
+              <mwc-textfield
+                id="on"
+                label="End on"
+                type="date"
+                value=${this._until!.toISOString().slice(0, 10)}
+                @change=${this._onUntilChange}
+              ></mwc-textfield>
+            `
+          : html``}
+      </div>
+    `;
+  }
 
-            ${this._end === 'after'
-              ? html`
-                  <mwc-textfield
-                    id="after"
-                    label="End after"
-                    type="number"
-                    min="1"
-                    value=${this._count!}
-                    suffix="ocurrences"
-                    @change=${this._onCountChange}
-                  ></mwc-textfield>
-                `
-              : html``}
-            ${this._end === 'on'
-              ? html`
-                  <mwc-textfield
-                    id="on"
-                    label="Ends on"
-                    type="date"
-                    value=${this._until!.toISOString().slice(0, 10)}
-                    @change=${this._onUntilChange}
-                  ></mwc-textfield>
-                `
-              : html``}
-          </div>`
-        : html``}
+  render() {
+    return html`
+      ${this.renderRepeat()}
+      ${this._freq === 'monthly' ? this.renderMonthly() : html``}
+      ${this._freq === 'weekly' ? this.renderWeekly() : html``}
+      ${this._freq === 'daily' ? this.renderDaily() : html``}
+      ${this._freq !== 'none' ? this.renderEnd() : html``}
     `;
   }
 
@@ -336,18 +281,18 @@ export class RecurrenceRuleEditor extends LitElement {
   }
 
   private _onUntilChange(e: Event) {
-    this._until = (e.target! as any).value;
+    this._until = new Date(Date.parse((e.target! as any).value));
     this._updateRule();
   }
 
-  private _ruleString() {
+  private _computeRRule() {
     if (this._freq === undefined || this._freq === 'none') {
       return '';
     }
     const options = {
       freq: convertRepeatFrequency(this._freq!)!,
       interval: this._interval > 1 ? this._interval : undefined,
-      byweekday: this._ruleByWeekDay(),
+      byweekday: ruleByWeekDay(this._weekday),
       count: this._count,
       until: this._until,
     };
@@ -355,36 +300,13 @@ export class RecurrenceRuleEditor extends LitElement {
     return contentline.slice(6); // Strip "RRULE:" prefix
   }
 
-  private _ruleByWeekDay(): Weekday[] | undefined {
-    return Array.from(this._weekday).map((value: string) => {
-      switch (value) {
-        case 'MO':
-          return RRule.MO;
-        case 'TU':
-          return RRule.TU;
-        case 'WE':
-          return RRule.WE;
-        case 'TH':
-          return RRule.TH;
-        case 'FR':
-          return RRule.FR;
-        case 'SA':
-          return RRule.SA;
-        case 'SU':
-          return RRule.SU;
-        default:
-          return RRule.MO;
-      }
-    });
-  }
-
   // Fire event with an rfc5546 recurrence rule string value
   private _updateRule() {
-    const rule = this._ruleString();
-    if (rule === this._computedRrule) {
+    const rule = this._computeRRule();
+    if (rule === this._computedRRule) {
       return;
     }
-    this._computedRrule = rule;
+    this._computedRRule = rule;
 
     this.dispatchEvent(
       new CustomEvent('value-changed', {
