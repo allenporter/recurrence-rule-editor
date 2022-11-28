@@ -81,14 +81,14 @@ const convertRepeatFrequency = (
 };
 
 const WEEKDAY_NAME = {
-  "SU": "Sun",
-  "MO": "Mon",
-  "TU": "Tue",
-  "WE": "Wed",
-  "TH": "Thu",
-  "FR": "Fri",
-  "SA": "Sat",
-}
+  SU: 'Sun',
+  MO: 'Mon',
+  TU: 'Tue',
+  WE: 'Wed',
+  TH: 'Thu',
+  FR: 'Fri',
+  SA: 'Sat',
+};
 const WEEKDAYS = [
   RRule.SU,
   RRule.MO,
@@ -124,7 +124,9 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @state() private _until?: Date;
 
-  private _allWeekdays: WeekdayStr[] = WEEKDAYS.map((day: Weekday) => day.toString() as WeekdayStr);
+  private _allWeekdays: WeekdayStr[] = WEEKDAYS.map(
+    (day: Weekday) => day.toString() as WeekdayStr
+  );
 
   protected willUpdate(changedProps: PropertyValues) {
     super.willUpdate(changedProps);
@@ -155,11 +157,19 @@ export class RecurrenceRuleEditor extends LitElement {
     if (rrule.interval) {
       this._interval = rrule.interval;
     }
-    if (this._freq === "weekly" && rrule.byweekday && Array.isArray(rrule.byweekday)) {
-      this._weekday = new Set<WeekdayStr>(rrule.byweekday.map((value: ByWeekday) => value.toString() as WeekdayStr));
+    if (
+      this._freq === 'weekly' &&
+      rrule.byweekday &&
+      Array.isArray(rrule.byweekday)
+    ) {
+      this._weekday = new Set<WeekdayStr>(
+        rrule.byweekday.map(
+          (value: ByWeekday) => value.toString() as WeekdayStr
+        )
+      );
     }
     if (rrule.until) {
-      this._end = 'on'
+      this._end = 'on';
       this._until = rrule.until;
     } else if (rrule.count) {
       this._end = 'after';
@@ -211,14 +221,16 @@ export class RecurrenceRuleEditor extends LitElement {
       ${this._freq === 'weekly'
         ? html`
             <div>
-              ${this._allWeekdays.map(item => html`
-                <button-toggle
-                  label="${WEEKDAY_NAME[item]}"
-                  value="${item}"
-                  .on=${this._weekday.has(item)}
-                  @button-toggle-change=${this._onWeekdayToggle}
-                ></button-toggle>
-              `)}
+              ${this._allWeekdays.map(
+                item => html`
+                  <button-toggle
+                    label="${WEEKDAY_NAME[item]}"
+                    value="${item}"
+                    .on=${this._weekday.has(item)}
+                    @button-toggle-change=${this._onWeekdayToggle}
+                  ></button-toggle>
+                `
+              )}
             </div>
           `
         : html``}
@@ -271,7 +283,8 @@ export class RecurrenceRuleEditor extends LitElement {
   }
 
   private _onRepeatSelected(e: CustomEvent<SelectedDetail<number>>) {
-    this._freq = (e.target as Select).items[e.detail.index].value as RepeatFrequency;
+    this._freq = (e.target as Select).items[e.detail.index]
+      .value as RepeatFrequency;
 
     if (this._freq === 'yearly') {
       this._interval = 1;
@@ -298,7 +311,7 @@ export class RecurrenceRuleEditor extends LitElement {
     if (end === this._end) {
       return;
     }
-    this._end = end
+    this._end = end;
 
     switch (this._end) {
       case 'after':
