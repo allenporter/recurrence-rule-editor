@@ -49,7 +49,7 @@ To run the tests in interactive watch mode run:
 npm run test:watch
 ```
 
-Tests use [chrome-launcher](https://github.com/GoogleChrome/chrome-launcher) which may need chrome downloaded locally. See the [download-chrome.sh](https://github.com/GoogleChrome/chrome-launcher/blob/main/scripts/download-chrome.sh) script then configure chrome environment variable before running tets.
+Tests use [chrome-launcher](https://github.com/GoogleChrome/chrome-launcher) which may need chrome downloaded locally. See the [download-chrome.sh](https://github.com/GoogleChrome/chrome-launcher/blob/main/scripts/download-chrome.sh) script then configure chrome environment variable before running tests.
 
 ```bash
 export CHROME_PATH=/home/${USER}/recurrence-rule-editor/chrome-linux/chrome
