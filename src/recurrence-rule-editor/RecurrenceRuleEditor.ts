@@ -3,8 +3,8 @@ import { state, property } from 'lit/decorators.js';
 import '@material/mwc-icon/mwc-icon.js';
 import '@material/mwc-list/mwc-list-item.js';
 import { SelectedDetail } from '@material/mwc-list';
-import { Select } from '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
-import '@material/mwc-select/mwc-select.js'; // eslint-disable-line import/no-duplicates
+import '@material/mwc-select/mwc-select.js';
+import type { Select } from '@material/mwc-select/mwc-select.js';
 import '@material/mwc-textfield/mwc-textfield.js';
 import './button-toggle/button-toggle.js';
 import { RRule, Weekday, ByWeekday } from 'rrule';
