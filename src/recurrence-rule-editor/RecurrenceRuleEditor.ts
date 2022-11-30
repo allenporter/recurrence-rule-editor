@@ -31,6 +31,8 @@ export class RecurrenceRuleEditor extends LitElement {
     }
   `;
 
+  @property() public disabled: boolean = false;
+
   @property() public value: string = '';
 
   @state() private _computedRRule = '';
@@ -98,6 +100,12 @@ export class RecurrenceRuleEditor extends LitElement {
       this._end = 'after';
       this._count = rrule.count;
     }
+  }
+
+  renderAsText() {
+    // TODO: Make sure this handles translations
+    const readableText = (this.value === "" || this._freq === undefined) ? "" : RRule.fromString(`RRULE:${this.value}`).toText();
+    return html`<div id="text">${readableText}</div>`;
   }
 
   renderRepeat() {
@@ -213,6 +221,9 @@ export class RecurrenceRuleEditor extends LitElement {
   }
 
   render() {
+    if (this.disabled) {
+      return this.renderAsText();
+    }
     return html`
       ${this.renderRepeat()}
       ${this._freq === 'monthly' ? this.renderMonthly() : html``}

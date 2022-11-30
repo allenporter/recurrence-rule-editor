@@ -595,4 +595,41 @@ describe('RecurrenceRuleEditor', () => {
     const sel = el.shadowRoot!.querySelector('mwc-select')!;
     expect(sel.selected).equal(null);
   });
+
+  it('can be disabled with empty rule', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor disabled=true></recurrence-rule-editor>`
+    );
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    expect(sel).to.equal(null);
+
+    const text = el.shadowRoot!.querySelector('div#text')! as HTMLElement;
+    expect(text.innerText).to.equal("");
+  });
+
+  it('can be disabled with yearly frequency', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor disabled=true value="FREQ=YEARLY"></recurrence-rule-editor>`
+    );
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    expect(sel).to.equal(null);
+
+    const text = el.shadowRoot!.querySelector('div#text')! as HTMLElement;
+    expect(text.innerText).to.equal("every year");
+  });
+
+
+  it('can be disabled with weekly frequency', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor disabled=true value="FREQ=WEEKLY;BYDAY=TH,SU"></recurrence-rule-editor>`
+    );
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    expect(sel).to.equal(null);
+
+    const text = el.shadowRoot!.querySelector('div#text')! as HTMLElement;
+    expect(text.innerText).to.equal("every week on Thursday, Sunday");
+  });
 });
