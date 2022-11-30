@@ -100,6 +100,19 @@ export const WEEKDAYS = [
   RRule.SA,
 ];
 
+export function getWeekdays(firstDay?: number) {
+  if (firstDay === undefined || firstDay === 0) {
+    return WEEKDAYS;
+  }
+  let iterator = firstDay;
+  const weekDays: Weekday[] = [...WEEKDAYS];
+  while (iterator > 0) {
+    weekDays.push(weekDays.shift() as Weekday);
+    iterator -= 1;
+  }
+  return weekDays;
+}
+
 export function ruleByWeekDay(
   weekdays: Set<WeekdayStr>
 ): Weekday[] | undefined {

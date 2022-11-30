@@ -9,11 +9,12 @@ import '@material/mwc-textfield/mwc-textfield.js';
 import './button-toggle/button-toggle.js';
 import { RRule, Weekday, ByWeekday } from 'rrule';
 import type { Options, WeekdayStr } from 'rrule';
+import type { LocaleData } from './locale-data.js';
 import {
   RepeatFrequency,
   RepeatEnd,
   convertFrequency,
-  WEEKDAYS,
+  getWeekdays,
   WEEKDAY_NAME,
   intervalSuffix,
   DEFAULT_COUNT,
@@ -35,6 +36,8 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @property() public value: string = '';
 
+  @property() public localeData: LocaleData = {};
+
   @state() private _computedRRule = '';
 
   @state() private _freq?: RepeatFrequency = 'none';
@@ -49,14 +52,12 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @state() private _until?: Date;
 
-  private _allWeekdays: WeekdayStr[] = WEEKDAYS.map(
-    (day: Weekday) => day.toString() as WeekdayStr
-  );
+  private _allWeekdays?: WeekdayStr[];
 
   protected willUpdate(changedProps: PropertyValues) {
     super.willUpdate(changedProps);
 
-    if (!changedProps.has('value')) {
+    if (!changedProps.has('value') && !changedProps.has('localeData')) {
       return;
     }
     this._interval = 1;
@@ -64,6 +65,10 @@ export class RecurrenceRuleEditor extends LitElement {
     this._end = 'never';
     this._count = undefined;
     this._until = undefined;
+
+    this._allWeekdays = getWeekdays(this.localeData.firstDay).map(
+      (day: Weekday) => day.toString() as WeekdayStr
+    );
 
     this._computedRRule = this.value;
     if (this.value === '') {
@@ -147,7 +152,7 @@ export class RecurrenceRuleEditor extends LitElement {
     return html`
       ${this.renderInterval()}
       <div>
-        ${this._allWeekdays.map(
+        ${this._allWeekdays!.map(
           item => html`
             <button-toggle
               label="${WEEKDAY_NAME[item]}"
