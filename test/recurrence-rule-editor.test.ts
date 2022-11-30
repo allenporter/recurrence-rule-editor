@@ -181,6 +181,38 @@ describe('RecurrenceRuleEditor', () => {
     }
   });
 
+  it('can change first day of the day of week', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor
+        .localeData=${{ firstDay: 1 }}
+      ></recurrence-rule-editor>`
+    );
+    await elementUpdated(el);
+
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    setTimeout(async () => {
+      sel.select(3); // Weekly
+    });
+
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=WEEKLY');
+    }
+
+    // eslint-disable-next-line no-undef
+    const toggles: NodeListOf<ButtonToggle> =
+      el.shadowRoot!.querySelectorAll('button-toggle');
+    expect(toggles.length).to.equal(7);
+
+    setTimeout(async () => {
+      toggles[0].shadowRoot!.querySelector('mwc-button')!.click();
+    });
+    {
+      const { detail } = await oneEvent(el, 'value-changed');
+      expect(detail.value).to.equal('FREQ=WEEKLY;BYDAY=MO'); // First day is Monday instead of Sunday
+    }
+  });
+
   it('can multi-select day of week', async () => {
     const el = await fixture<RecurrenceRuleEditor>(
       html`<recurrence-rule-editor></recurrence-rule-editor>`
