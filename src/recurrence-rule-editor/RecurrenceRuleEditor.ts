@@ -104,7 +104,10 @@ export class RecurrenceRuleEditor extends LitElement {
 
   renderAsText() {
     // TODO: Make sure this handles translations
-    const readableText = (this.value === "" || this._freq === undefined) ? "" : RRule.fromString(`RRULE:${this.value}`).toText();
+    const readableText =
+      this.value === '' || this._freq === undefined
+        ? ''
+        : RRule.fromString(`RRULE:${this.value}`).toText();
     return html`<div id="text">${readableText}</div>`;
   }
 
