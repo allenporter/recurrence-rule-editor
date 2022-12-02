@@ -63,7 +63,6 @@ export class RecurrenceRuleEditor extends LitElement {
       );
     }
 
-
     if (!changedProps.has('value') || this._computedRRule === this.value) {
       return;
     }
