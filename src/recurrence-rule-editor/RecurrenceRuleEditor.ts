@@ -57,18 +57,21 @@ export class RecurrenceRuleEditor extends LitElement {
   protected willUpdate(changedProps: PropertyValues) {
     super.willUpdate(changedProps);
 
-    if (!changedProps.has('value') && !changedProps.has('localeData')) {
+    if (changedProps.has('localeData')) {
+      this._allWeekdays = getWeekdays(this.localeData.firstDay).map(
+        (day: Weekday) => day.toString() as WeekdayStr
+      );
+    }
+
+    if (!changedProps.has('value') || this._computedRRule === this.value) {
       return;
     }
+
     this._interval = 1;
     this._weekday.clear();
     this._end = 'never';
     this._count = undefined;
     this._until = undefined;
-
-    this._allWeekdays = getWeekdays(this.localeData.firstDay).map(
-      (day: Weekday) => day.toString() as WeekdayStr
-    );
 
     this._computedRRule = this.value;
     if (this.value === '') {
@@ -300,7 +303,8 @@ export class RecurrenceRuleEditor extends LitElement {
   }
 
   private _onUntilChange(e: Event) {
-    this._until = new Date(Date.parse((e.target! as any).value));
+    e.stopPropagation();
+    this._until = new Date((e.target! as any).value);
     this._updateRule();
   }
 
