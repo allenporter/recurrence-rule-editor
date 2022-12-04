@@ -1,6 +1,6 @@
 // Library for converting back and forth from values use by this webcomponent
 // and the values defined by rrule.js.
-import { add } from 'date-fns'
+import { add } from 'date-fns';
 import { RRule, Frequency, Weekday } from 'rrule';
 import type { WeekdayStr } from 'rrule';
 
