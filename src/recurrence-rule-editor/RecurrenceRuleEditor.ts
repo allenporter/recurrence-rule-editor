@@ -287,7 +287,7 @@ export class RecurrenceRuleEditor extends LitElement {
         break;
       case 'on':
         this._count = undefined;
-        this._until = untilValue(this._freq!);
+        this._until = untilValue(new Date(), this._freq!);
         break;
       default:
         this._count = undefined;

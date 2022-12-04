@@ -36,6 +36,7 @@
     "@web/rollup-plugin-html": "^1.11.0",
     "@web/test-runner-puppeteer": "^0.11.0",
     "array-union": "^3.0.1",
+    "date-fns": "^2.29.3",
     "deepmerge": "^4.2.2",
     "lit": "^2.4.1",
     "puppeteer": "^19.3.0",

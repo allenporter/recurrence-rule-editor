@@ -1,5 +1,6 @@
 // Library for converting back and forth from values use by this webcomponent
 // and the values defined by rrule.js.
+import { add } from 'date-fns';
 import { RRule, Frequency, Weekday } from 'rrule';
 import type { WeekdayStr } from 'rrule';
 
@@ -30,19 +31,18 @@ export function intervalSuffix(freq: RepeatFrequency) {
   return 'days';
 }
 
-export function untilValue(freq: RepeatFrequency): Date {
-  const today = new Date();
+export function untilValue(startDate: Date, freq: RepeatFrequency): Date {
   const increment = DEFAULT_COUNT[freq];
   switch (freq) {
     case 'yearly':
-      return new Date(new Date().setFullYear(today.getFullYear() + increment));
+      return add(startDate, { years: 1 });
     case 'monthly':
-      return new Date(new Date().setMonth(today.getMonth() + increment));
+      return add(startDate, { months: increment });
     case 'weekly':
-      return new Date(new Date().setDate(today.getDate() + 7 * increment));
+      return add(startDate, { weeks: increment });
     case 'daily':
     default:
-      return new Date(new Date().setDate(today.getDate() + increment));
+      return add(startDate, { days: increment });
   }
 }
 
