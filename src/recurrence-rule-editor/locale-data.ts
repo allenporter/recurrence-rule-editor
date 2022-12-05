@@ -1,5 +1,5 @@
 export interface LocaleData {
-  firstDay?: number;
+  firstDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | undefined;
 
   /*
     In the future consider other locale data:

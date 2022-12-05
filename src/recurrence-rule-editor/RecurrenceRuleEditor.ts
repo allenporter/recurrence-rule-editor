@@ -1,3 +1,4 @@
+import { getDate, startOfToday } from 'date-fns';
 import { html, css, LitElement, PropertyValues } from 'lit';
 import { state, property } from 'lit/decorators.js';
 import '@material/mwc-icon/mwc-icon.js';
@@ -14,6 +15,7 @@ import {
   RepeatFrequency,
   RepeatEnd,
   convertFrequency,
+  getWeekday,
   getWeekdays,
   WEEKDAY_NAME,
   intervalSuffix,
@@ -21,6 +23,7 @@ import {
   untilValue,
   convertRepeatFrequency,
   ruleByWeekDay,
+  getWeekydaysForMonth,
 } from './recurrence.js';
 
 export class RecurrenceRuleEditor extends LitElement {
@@ -30,11 +33,21 @@ export class RecurrenceRuleEditor extends LitElement {
       padding: 25px;
       color: var(--recurrence-rule-editor-text-color, #000);
     }
+
+    mwc-select {
+      width: 400px;
+    }
   `;
 
   @property() public disabled: boolean = false;
 
+  @property() public start: boolean = false;
+
+  @property() public end: boolean = true;
+
   @property() public value: string = '';
+
+  @property() public dtstart?: Date;
 
   @property() public localeData: LocaleData = {};
 
@@ -46,6 +59,8 @@ export class RecurrenceRuleEditor extends LitElement {
 
   @state() private _weekday: Set<WeekdayStr> = new Set<WeekdayStr>();
 
+  @state() private _monthWeekday?: Weekday;
+
   @state() private _end: RepeatEnd = 'never';
 
   @state() private _count?: number;
@@ -54,6 +69,8 @@ export class RecurrenceRuleEditor extends LitElement {
 
   private _allWeekdays?: WeekdayStr[];
 
+  private _allMonthWeekdays?: Weekday[];
+
   protected willUpdate(changedProps: PropertyValues) {
     super.willUpdate(changedProps);
 
@@ -61,6 +78,14 @@ export class RecurrenceRuleEditor extends LitElement {
       this._allWeekdays = getWeekdays(this.localeData.firstDay).map(
         (day: Weekday) => day.toString() as WeekdayStr
       );
+    }
+
+    if (changedProps.has('dtstart')) {
+      this._allMonthWeekdays = getWeekydaysForMonth(
+        this.dtstart ? this.dtstart : startOfToday()
+      );
+      this._monthWeekday = undefined;
+      this._computeWeekday();
     }
 
     if (!changedProps.has('value') || this._computedRRule === this.value) {
@@ -91,6 +116,17 @@ export class RecurrenceRuleEditor extends LitElement {
       this._interval = rrule.interval;
     }
     if (
+      this._freq === 'monthly' &&
+      rrule.byweekday &&
+      Array.isArray(rrule.byweekday) &&
+      rrule.byweekday.length === 1 &&
+      rrule.byweekday[0] instanceof Weekday
+    ) {
+      [this._monthWeekday] = rrule.byweekday;
+    } else {
+      this._monthWeekday = undefined;
+    }
+    if (
       this._freq === 'weekly' &&
       rrule.byweekday &&
       Array.isArray(rrule.byweekday)
@@ -117,6 +153,18 @@ export class RecurrenceRuleEditor extends LitElement {
         ? ''
         : RRule.fromString(`RRULE:${this.value}`).toText();
     return html`<div id="text">${readableText}</div>`;
+  }
+
+  renderStart() {
+    return html`
+      <mwc-textfield
+        id="start"
+        label="Event start"
+        type="date"
+        value=${this.dtstart ? this.dtstart.toISOString().split('T')[0] : ''}
+        @change=${this._onStartChange}
+      ></mwc-textfield>
+    `;
   }
 
   renderRepeat() {
@@ -148,7 +196,48 @@ export class RecurrenceRuleEditor extends LitElement {
   }
 
   renderMonthly() {
-    return this.renderInterval();
+    return html`
+      ${this.renderInterval()}
+      ${this.dtstart !== undefined
+        ? html` <mwc-select
+            id="monthly"
+            label="Repeat Monthly"
+            @selected=${this._onMonthlyDetailSelected}
+          >
+            <mwc-list-item
+              value="BYMONTHDAY"
+              .selected=${this._monthWeekday === undefined}
+            >
+              ${this.renderRRuleByMonthDay()}
+            </mwc-list-item>
+            ${this._allMonthWeekdays!.map(
+              item => html`
+                <mwc-list-item
+                  value="${item.toString()}"
+                  .selected="${this._monthWeekday !== undefined &&
+                  this._monthWeekday.equals(item)}"
+                >
+                  ${this.renderRRuleByDay(item)}
+                </mwc-list-item>
+              `
+            )}
+          </mwc-select>`
+        : html``}
+    `;
+  }
+
+  renderRRuleByMonthDay() {
+    return RRule.fromString(
+      `RRULE:FREQ=MONTHLY;INTERVAL=${this._interval};BYMONTHDAY=${getDate(
+        this.dtstart!
+      )}`
+    ).toText();
+  }
+
+  renderRRuleByDay(byday: Weekday) {
+    return RRule.fromString(
+      `RRULE:FREQ=MONTHLY;INTERVAL=${this._interval};BYDAY=${byday.toString()}`
+    ).toText();
   }
 
   renderWeekly() {
@@ -236,12 +325,22 @@ export class RecurrenceRuleEditor extends LitElement {
       return this.renderAsText();
     }
     return html`
-      ${this.renderRepeat()}
+      ${this.start ? this.renderStart() : html``} ${this.renderRepeat()}
       ${this._freq === 'monthly' ? this.renderMonthly() : html``}
       ${this._freq === 'weekly' ? this.renderWeekly() : html``}
       ${this._freq === 'daily' ? this.renderDaily() : html``}
-      ${this._freq !== 'none' ? this.renderEnd() : html``}
+      ${this._freq !== 'none' && this.end ? this.renderEnd() : html``}
     `;
+  }
+
+  private _onStartChange(e: Event) {
+    e.stopPropagation();
+    const dtstart = new Date((e.target! as any).value);
+    this.dispatchEvent(
+      new CustomEvent('dtstart-changed', {
+        detail: { value: dtstart },
+      })
+    );
   }
 
   private _onIntervalChange(e: Event) {
@@ -258,9 +357,20 @@ export class RecurrenceRuleEditor extends LitElement {
     }
     if (this._freq !== 'weekly') {
       this._weekday.clear();
+      this._computeWeekday();
     }
     e.stopPropagation();
     this._updateRule();
+  }
+
+  private _onMonthlyDetailSelected(e: CustomEvent<SelectedDetail<number>>) {
+    const { value } = (e.target as Select).items[e.detail.index];
+    if (value === 'BYMONTHDAY') {
+      // Default is already by day of month
+      this._monthWeekday = undefined;
+    } else {
+      this._monthWeekday = Weekday.fromStr(value as WeekdayStr);
+    }
   }
 
   private _onWeekdayToggle(e: CustomEvent) {
@@ -306,6 +416,15 @@ export class RecurrenceRuleEditor extends LitElement {
     e.stopPropagation();
     this._until = new Date((e.target! as any).value);
     this._updateRule();
+  }
+
+  // Reset the weekday selected when there is only a single value
+  private _computeWeekday() {
+    if (this.dtstart && this._weekday.size <= 1) {
+      const weekdayNum = getWeekday(this.dtstart);
+      this._weekday.clear();
+      this._weekday.add(new Weekday(weekdayNum).toString() as WeekdayStr);
+    }
   }
 
   private _computeRRule() {

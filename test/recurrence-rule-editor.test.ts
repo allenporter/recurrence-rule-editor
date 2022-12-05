@@ -470,6 +470,21 @@ describe('RecurrenceRuleEditor', () => {
     expect(sel.selected!.value).to.equal('monthly');
   });
 
+  /*
+XXX
+  it('can parse a monthly "rrule" as input', async () => {
+    const el = await fixture<RecurrenceRuleEditor>(
+      html`<recurrence-rule-editor dtstart=${new Date(2022, 10, 25)}
+        value="FREQ=MONTHLY;BYDAY=-TU"
+      ></recurrence-rule-editor>`
+    );
+    const sel = el.shadowRoot!.querySelector('mwc-select')!;
+    await elementUpdated(sel);
+    expect(sel.selected).not.equal(null);
+    expect(sel.selected!.value).to.equal('monthly');
+  });
+  */
+
   it('can parse a weekly "rrule" as input', async () => {
     const el = await fixture<RecurrenceRuleEditor>(
       html`<recurrence-rule-editor

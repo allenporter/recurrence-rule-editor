@@ -1,6 +1,6 @@
 // Library for converting back and forth from values use by this webcomponent
 // and the values defined by rrule.js.
-import { add } from 'date-fns';
+import { add, getDate, getDay, getMonth, addDays } from 'date-fns';
 import { RRule, Frequency, Weekday } from 'rrule';
 import type { WeekdayStr } from 'rrule';
 
@@ -20,6 +20,14 @@ export const DEFAULT_COUNT = {
   weekly: 13,
   daily: 30,
 };
+
+export interface MonthlyRepeat {
+  // The human readable string e.g. "On the last Tuesday"
+  label: string;
+
+  // The recurrence rule value
+  value: string;
+}
 
 export function intervalSuffix(freq: RepeatFrequency) {
   if (freq === 'monthly') {
@@ -100,6 +108,15 @@ export const WEEKDAYS = [
   RRule.SA,
 ];
 
+/** Return a weekday number compatible with rrule.js weekdays */
+export function getWeekday(dtstart: Date): number {
+  let weekDay = getDay(dtstart) - 1;
+  if (weekDay < 0) {
+    weekDay += 7;
+  }
+  return weekDay;
+}
+
 export function getWeekdays(firstDay?: number) {
   if (firstDay === undefined || firstDay === 0) {
     return WEEKDAYS;
@@ -136,4 +153,22 @@ export function ruleByWeekDay(
         return RRule.MO;
     }
   });
+}
+
+/**
+ * Determine the recurrence options based on the day of the month, e.g. "First Saturday" or "3rd Wednesday".
+ */
+export function getWeekydaysForMonth(dtstart: Date): Weekday[] {
+  const weekDay = getWeekday(dtstart);
+  const dayOfMonth = getDate(dtstart);
+  const weekOfMonth = Math.floor((dayOfMonth - 1) / 7) + 1;
+  const isLastWeekday = getMonth(dtstart) !== getMonth(addDays(dtstart, 7));
+  const byweekdays: Weekday[] = [];
+  if (!isLastWeekday || dayOfMonth <= 28) {
+    byweekdays.push(new Weekday(weekDay, weekOfMonth));
+  }
+  if (isLastWeekday) {
+    byweekdays.push(new Weekday(weekDay, -1));
+  }
+  return byweekdays;
 }
