@@ -40,6 +40,17 @@
   <script type="module">
     import { html, render } from 'lit';
     import '../dist/src/recurrence-rule-editor/recurrence-rule-editor.js';
+    import { parse } from 'date-fns';
+
+
+    function _dtstartChanged(e) {
+      // Drop local timezone conversion by getting date in UTC
+      const inputDate = e.detail.value.toISOString().split('T')[0];
+      const newDate = parse(inputDate, 'yyyy-MM-dd', new Date())
+      console.log(`Date input chagned: ${newDate.toISOString()}`);
+      const ruleElement = document.querySelector('recurrence-rule-editor');
+      ruleElement.dtstart = newDate;
+    }
 
     function _valueChanged(e) {
       const ruleElement = document.querySelector('#rule');
@@ -48,7 +59,7 @@
 
     render(
       html`
-        <recurrence-rule-editor @value-changed=${_valueChanged}>
+        <recurrence-rule-editor start=true .dtstart=${new Date(2022, 9, 31)} @value-changed=${_valueChanged} @dtstart-changed=${_dtstartChanged}>
         </recurrence-rule-editor>
       `,
       document.querySelector('#demo')
